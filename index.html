@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F5F5F9">
+<meta name="theme-color" content="#1A2133">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="하루 한 컷">
@@ -325,112 +325,64 @@ mark { background: var(--hl); color: var(--on-hl); border-radius: 3px; padding: 
   .app { transition: none; }
 }
 
-/* ===== v3: 파스텔 · 아이폰 느낌 ===== */
-:root {
-  --bg: #F5F5F9; --bgtop: #F5F5F9; --surface: #FFFFFF; --ink: #2B2A36; --muted: #8381920; --line: #ECEAF2;
-  --hl: #FFE08A; --on-hl: #3A3220; --focus: #E8B53A; --danger: #D0584A;
-  --star-bg: #F1EFF6; --star-line: #E2DFEC; --star-on: #EDB63B; --stamp: #FFB84D;
-  --shadow: 0 1px 2px rgba(60,50,100,.04), 0 8px 24px rgba(60,50,100,.06);
-  --glass: rgba(255,255,255,.72);
-  --f-display: "Gowun Batang", "Nanum Myeongjo", "Apple Myungjo", serif;
-  --f-body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --tag-bg: #FFF0BF; --amt-bg: #DCF3E9; --amt-ink: #2F6F57; --item-bg: #F8F7FB;
-  --mint: #E1F4EC; --sky: #E2EEFB; --blush: #FCE7E8; --butter: #FFF3CC;
+/* ===== v4: 원래 모양 + 부드러운 그라데이션 바탕 + 제목만 살짝 작게 + 회색 톤 글씨 ===== */
+:root { --ink: #596074; --muted: #7C8298; }
+.btn.primary, .nudge .btn { background: #2B3144; border-color: #2B3144; color: #fff; }
+:root { --on-hl: #3F4256; }
+.fast b { font-weight: 700; }
+/* 별점·이모지 선 연하게 / 날짜 작게 / 제목 살짝 얇게 */
+.star .empty-star { fill: #F4F3F8; stroke: #E6E4EE; stroke-width: 1.2; }
+.star .fill-box svg { fill: #FFD95E; stroke: #F2CB74; stroke-width: 1.2; }
+.sstamp svg { fill: #FFDD66; stroke: #F2CB74; stroke-width: .8; }
+.wx, .wxo, .opts .chip { border-color: transparent; box-shadow: 0 1px 3px rgba(60,70,110,.10); }
+.wxo[aria-pressed="true"] { box-shadow: 0 1px 3px rgba(230,180,40,.35); }
+.date-title h1 { font-size: 26px; }
+@media (min-width: 800px) { .date-title h1 { font-size: 30px; } }
+.brand, .date-title h1, .sec-head h2, .welcome h2, .mnav h2, .sh2 { font-weight: 400; -webkit-text-stroke: .45px currentColor; }
+.brand .heart { display: inline-block; margin-left: 5px; font-size: 11px; color: #F2A4B8; -webkit-text-stroke: 0; vertical-align: 2px; }
+
+/* 내가 적은 것: 흰 종이 바탕 */
+.list, .diary {
+  background-color: rgba(255,254,251,.80);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .38  0 0 0 0 .3  0 0 0 .02 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(50,60,100,.06), 0 6px 18px rgba(50,60,100,.07);
 }
-:root { --muted: #858294; }
+.list { padding: 2px 16px; }
+.list .item:last-child { border-bottom: 0; }
+.list .item { border-bottom-color: rgba(225,218,196,.55); }
+.list .empty-note { padding: 14px 0; }
+.diary { padding: 14px 16px 16px; border-bottom: 0; min-height: 132px; }
+.diary:focus { box-shadow: 0 0 0 2px var(--hl), 0 6px 18px rgba(50,60,100,.07); }
+.item .txt, .diary { color: #3A3F53; }
+.item .time, .item .amt { color: #5A6074; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #17161C; --bgtop: #17161C; --surface: #23222B; --ink: #F3F1F8; --muted: #B2AFC0; --line: #34323F;
-    --hl: #F2CF6B; --on-hl: #2B2616; --star-bg: #2F2D3A; --star-line: #444154; --star-on: #F2CF6B;
-    --shadow: 0 8px 24px rgba(0,0,0,.35); --glass: rgba(35,34,43,.72);
-    --tag-bg: #4A4325; --amt-bg: #22463A; --amt-ink: #A8F0D2; --item-bg: #2A2933;
-    --mint: #1F3A33; --sky: #1F2F45; --blush: #3E2A2D; --butter: #3B3320;
-  }
+  :root:not([data-theme="light"]) .list, :root:not([data-theme="light"]) .diary { background-color: var(--surface); background-image: none; box-shadow: none; }
+  :root:not([data-theme="light"]) .item .txt { color: var(--ink); }
+  :root:not([data-theme="light"]) .item .time, :root:not([data-theme="light"]) .item .amt { color: var(--muted); }
 }
-:root[data-theme="dark"] {
-  --bg: #17161C; --bgtop: #17161C; --surface: #23222B; --ink: #F3F1F8; --muted: #B2AFC0; --line: #34323F;
-  --hl: #F2CF6B; --on-hl: #2B2616; --star-bg: #2F2D3A; --star-line: #444154; --star-on: #F2CF6B;
-  --shadow: 0 8px 24px rgba(0,0,0,.35); --glass: rgba(35,34,43,.72);
-  --tag-bg: #4A4325; --amt-bg: #22463A; --amt-ink: #A8F0D2; --item-bg: #2A2933;
-  --mint: #1F3A33; --sky: #1F2F45; --blush: #3E2A2D; --butter: #3B3320;
-}
-html { background: var(--bg); }
+:root[data-theme="dark"] .list, :root[data-theme="dark"] .diary { background-color: var(--surface); background-image: none; box-shadow: none; }
+:root[data-theme="dark"] .item .txt { color: var(--ink); }
+:root[data-theme="dark"] .item .time, :root[data-theme="dark"] .item .amt { color: var(--muted); }
+
 body {
   background:
-    radial-gradient(120% 46% at 0% 0%, rgba(255,235,170,.55) 0%, rgba(255,235,170,0) 70%),
-    radial-gradient(90% 40% at 100% 4%, rgba(205,236,225,.60) 0%, rgba(205,236,225,0) 70%),
-    radial-gradient(80% 36% at 55% 0%, rgba(214,229,250,.45) 0%, rgba(214,229,250,0) 70%),
+    radial-gradient(130% 55% at 0% 0%, rgba(255,230,150,.70) 0%, rgba(255,230,150,0) 70%),
+    radial-gradient(100% 50% at 100% 6%, rgba(196,236,220,.75) 0%, rgba(196,236,220,0) 72%),
+    radial-gradient(90% 46% at 50% 0%, rgba(208,226,252,.55) 0%, rgba(208,226,252,0) 72%),
     var(--bg);
   background-repeat: no-repeat;
-  font-size: 16px; font-weight: 400; line-height: 1.6; letter-spacing: -0.005em;
-  padding-block: 14px 80px;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body { background: var(--bg); } }
 :root[data-theme="dark"] body { background: var(--bg); }
-.app { gap: 22px; }
-/* 맨 위: 작은 버튼 줄 + 큰 제목 (아이폰 큰 제목 느낌) */
-.app-top { margin-bottom: -6px; gap: 2px; }
-.bar { flex-wrap: wrap; align-items: flex-end; row-gap: 6px; }
-.bar-right { order: -1; width: 100%; justify-content: flex-end; gap: 8px; }
-.brand { order: 1; font-family: var(--f-display); font-weight: 700; font-size: 31px; line-height: 1.2; letter-spacing: -0.02em; width: 100%; }
-.gear { flex: none; white-space: nowrap; height: 32px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--glass); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 2px rgba(60,50,100,.06); font-size: 13px; font-weight: 500; color: var(--ink); }
-.status { font-size: 12px; color: var(--muted); }
-.date-title h1 { font-family: var(--f-display); font-weight: 700; font-size: 26px; letter-spacing: -0.01em; color: var(--ink); }
-.date-title p { font-size: 14px; color: var(--muted); }
-.nav, .today-btn { width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--glass); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 1px 2px rgba(60,50,100,.06); }
-.today-btn { width: auto; padding: 0 14px; border-radius: 999px; font-weight: 500; }
-.wx { border: 0; background: var(--surface); box-shadow: var(--shadow); width: 44px; height: 44px; }
-.wxo { border: 0; border-radius: 14px; background: var(--item-bg); width: 42px; height: 42px; }
-.wxo[aria-pressed="true"] { background: var(--butter); box-shadow: inset 0 0 0 2px var(--hl); }
-.moodbox { background: var(--surface); border-radius: 22px; box-shadow: var(--shadow); padding: 14px 12px 10px; gap: 8px; margin-top: 16px; }
-.moodrow .lbl { width: 34px; font-weight: 500; font-size: 13px; }
-.week { margin-top: 14px; background: var(--surface); border-radius: 22px; box-shadow: var(--shadow); padding: 8px 6px; gap: 2px; }
-.wday { border-radius: 16px; }
-.wday[aria-pressed="true"] { background: var(--butter); box-shadow: inset 0 0 0 2px var(--hl); }
-.wday .dn { font-weight: 500; }
-.summary { font-size: 13px; color: var(--muted); }
-.sec { background: var(--surface); border-top: 0; border-radius: 22px; padding: 18px 16px; box-shadow: var(--shadow); gap: 12px; }
-.sec-head h2 { font-family: var(--f-display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
-.meta { font-weight: 500; font-size: 13px; }
-.photo { border: 0; border-radius: 18px; background: linear-gradient(145deg, var(--butter), var(--mint) 60%, var(--sky)); }
-.photo.empty { border: 1.5px dashed #E7D9A6; }
-.photo-empty strong { font-family: var(--f-display); font-weight: 700; }
-.diary { font-family: var(--f-display); font-size: 17px; line-height: 1.95; border-bottom: 1.5px dotted var(--line); padding: 10px 2px 14px; }
-.diary:focus { border-bottom-color: var(--hl); }
-/* 적은 것: 부드러운 둥근 줄 */
-.list { gap: 8px; }
-.item { gap: 10px; min-height: 52px; padding: 8px 6px 8px 12px; border: 0; border-radius: 16px; background: var(--item-bg); }
-.item .txt { font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--ink); }
-.item .time { min-width: 50px; font-size: 14px; font-weight: 500; color: var(--ink); text-align: center; padding: 4px 8px; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 2px rgba(60,50,100,.08); }
-.item .tag { min-width: 0; padding: 3px 10px; border-radius: 999px; background: var(--tag-bg); color: var(--ink); font-size: 12.5px; font-weight: 500; }
-.item .amt { padding: 3px 10px; border-radius: 999px; background: var(--amt-bg); color: var(--amt-ink); font-size: 13px; font-weight: 500; }
-.check { width: 36px; }
-.check .box { width: 25px; height: 25px; border: 1.8px solid #D2D0DD; border-radius: 50%; background: var(--surface); }
-.check[aria-checked="true"] .box { background: var(--hl); border-color: var(--hl); }
-.del { border-radius: 50%; }
-.empty-note { padding: 14px; border-radius: 14px; background: var(--item-bg); font-size: 14px; }
-.add input[type="text"], .add input[type="number"], .add input[type="time"], .memo, .field input[type="text"], .field input[type="time"], .searchbox {
-  border: 0; border-radius: 14px; background: var(--item-bg); font-weight: 400; }
-.add input:focus, .memo:focus, .field input:focus, .searchbox:focus { outline: none; box-shadow: inset 0 0 0 2px var(--hl); background: var(--surface); }
-.fast { border: 0; border-radius: 18px; background: linear-gradient(135deg, var(--mint), var(--sky)); padding: 13px 15px; font-size: 14.5px; font-weight: 400; gap: 5px; color: var(--ink); }
-.fast b { font-weight: 700; }
-.btn { border: 0; border-radius: 999px; background: var(--item-bg); box-shadow: none; font-weight: 500; padding: 0 18px; }
-.btn.primary { background: var(--ink); color: var(--surface); box-shadow: none; font-weight: 500; }
-.chip { border: 0; border-radius: 999px; background: var(--item-bg); box-shadow: none; font-weight: 500; }
-.chip[aria-pressed="true"] { background: var(--butter); color: var(--on-hl); box-shadow: inset 0 0 0 2px var(--hl); font-weight: 700; }
-.rate { height: 28px; padding: 0 12px; border-radius: 999px; background: var(--butter); box-shadow: inset 0 0 0 1.5px var(--hl); font-weight: 500; }
-.welcome { border: 0; border-radius: 24px; padding: 22px 20px; box-shadow: var(--shadow); }
-.welcome h2 { font-family: var(--f-display); font-weight: 700; }
-.nudge { border-radius: 18px; background: linear-gradient(135deg, var(--butter), var(--mint)); color: var(--ink); }
-.nudge .btn { background: var(--ink); color: var(--surface); }
-.restore-box, .sres { border: 0; border-radius: 18px; box-shadow: var(--shadow); }
-.mnav h2, .sh2 { font-family: var(--f-display); font-weight: 700; }
-.monthview canvas { border: 0; border-radius: 16px; box-shadow: var(--shadow); }
-.scell { border-radius: 14px; }
-.scell.today { box-shadow: inset 0 0 0 2px var(--hl); background: var(--butter); }
-.sstamp svg { stroke: #F0C060; }
-.stamp { font-family: var(--f-body); font-weight: 500; }
-.star .fill-box svg { stroke: var(--star-on); }
+.brand { font-size: 16px; }
+.date-title h1 { font-size: 30px; }
+.sec-head h2 { font-size: 19px; }
+.welcome h2 { font-size: 19px; }
+.mnav h2, .sh2 { font-size: 22px; }
+@media (min-width: 800px) { .date-title h1 { font-size: 34px; } }
 </style>
 
 <main class="app" id="app" aria-busy="true">
@@ -909,7 +861,7 @@ body {
   }
   function renderBrand() {
     var el = $('brandText');
-    if (el) el.textContent = settings.name ? settings.name + '의 하루 한 컷' : '하루 한 컷';
+    if (el) { el.textContent = settings.name ? settings.name + '의 하루 한 컷' : '하루 한 컷'; if (settings.name) { var hh = document.createElement('span'); hh.className = 'heart'; hh.setAttribute('aria-hidden', 'true'); hh.textContent = '\u2665'; el.appendChild(hh); } }
   }
   function renderHead() {
     renderBrand();
@@ -1371,7 +1323,7 @@ body {
   async function drawMonth(canvas, y, m, days, imgs, name) {
     var W = 1654, H = 2339, M = 110;
     var ctx = canvas.getContext('2d');
-    var INK = '#2B2A36', MUTED = '#858294', LINE = '#ECEAF2', SOFT = '#F6F5FA', HL = '#FFE08A';
+    var INK = '#1A2133', MUTED = '#656C84', LINE = '#DADDE8', SOFT = '#F1F2F6', HL = '#FFD84A';
     var SERIF = '"Gowun Batang","Nanum Myeongjo","Apple Myungjo",serif';
     var SANS = '"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
     var EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
