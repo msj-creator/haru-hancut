@@ -1,5 +1,5 @@
 /* 하루 한 컷: 한 번 열어 두면 인터넷이 없어도 열리게 앱 파일을 저장해 둬요 */
-var CACHE = 'haru-hancut-v9';
+var CACHE = 'haru-hancut-v14';
 var SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
