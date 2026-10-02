@@ -336,10 +336,14 @@ mark { background: var(--hl); color: var(--on-hl); border-radius: 3px; padding: 
 .sstamp svg { fill: #FFDD66; stroke: #F2CB74; stroke-width: .8; }
 .wx, .wxo, .opts .chip { border-color: transparent; box-shadow: 0 1px 3px rgba(60,70,110,.10); }
 .wxo[aria-pressed="true"] { box-shadow: 0 1px 3px rgba(230,180,40,.35); }
-.date-title h1 { font-size: 26px; }
-@media (min-width: 800px) { .date-title h1 { font-size: 30px; } }
+.date-title h1 { font-size: 23px; }
+@media (min-width: 800px) { .date-title h1 { font-size: 27px; } }
 .brand, .date-title h1, .sec-head h2, .welcome h2, .mnav h2, .sh2 { font-weight: 400; -webkit-text-stroke: .45px currentColor; }
-.brand .heart { display: inline-block; margin-left: 5px; font-size: 11px; color: #F2A4B8; -webkit-text-stroke: 0; vertical-align: 2px; }
+.bar { align-items: flex-start; }
+.gear { white-space: nowrap; flex: none; }
+.bar-right { flex: none; }
+.brand { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; font-size: 18px; }
+.brand .heart { display: inline-block; margin-left: 5px; font-size: 10px; margin: 0 1px 0 3px; color: #F2A4B8; -webkit-text-stroke: 0; vertical-align: 2px; }
 
 /* 내가 적은 것: 흰 종이 바탕 */
 .list, .diary {
@@ -861,7 +865,7 @@ body {
   }
   function renderBrand() {
     var el = $('brandText');
-    if (el) { el.textContent = settings.name ? settings.name + '의 하루 한 컷' : '하루 한 컷'; if (settings.name) { var hh = document.createElement('span'); hh.className = 'heart'; hh.setAttribute('aria-hidden', 'true'); hh.textContent = '\u2665'; el.appendChild(hh); } }
+    if (el) { el.textContent = ''; if (settings.name) { el.appendChild(document.createTextNode(settings.name)); var hh = document.createElement('span'); hh.className = 'heart'; hh.setAttribute('aria-hidden', 'true'); hh.textContent = '\u2665'; el.appendChild(hh); el.appendChild(document.createTextNode('의')); el.appendChild(document.createElement('br')); } el.appendChild(document.createTextNode('하루 한 컷')); }
   }
   function renderHead() {
     renderBrand();
