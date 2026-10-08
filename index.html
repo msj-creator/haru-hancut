@@ -385,6 +385,22 @@ body {
 .sec-head h2 { font-size: 19px; }
 .welcome h2 { font-size: 19px; }
 .mnav h2, .sh2 { font-size: 22px; }
+
+/* 사진 조정 */
+.crop-back { position: fixed; inset: 0; z-index: 60; background: rgba(30,34,48,.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.crop-back[hidden] { display: none; }
+.crop-card { width: min(440px, 100%); background: #FFFEFB; border-radius: 20px; padding: 18px 18px 16px; box-shadow: 0 24px 60px rgba(30,34,48,.35); color: #596074; }
+.crop-card h3 { margin: 0 0 4px; font-family: var(--f-display); font-weight: 400; font-size: 19px; }
+.crop-card p { margin: 0 0 12px; font-size: 13px; color: #7C8298; }
+.crop-frame { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 14px; background: #E9EBF2; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.crop-frame:active { cursor: grabbing; }
+.crop-frame img { position: absolute; left: 0; top: 0; max-width: none; pointer-events: none; -webkit-user-drag: none; }
+.crop-frame::after { content: ""; position: absolute; inset: 0; border-radius: 14px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.7); pointer-events: none;
+  background: linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)) 33.33% 0/1px 100% no-repeat, linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)) 66.66% 0/1px 100% no-repeat, linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)) 0 33.33%/100% 1px no-repeat, linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,.28)) 0 66.66%/100% 1px no-repeat; }
+.crop-zoom { display: flex; align-items: center; gap: 10px; margin: 14px 2px 4px; font-size: 13px; color: #7C8298; }
+.crop-zoom input { flex: 1; accent-color: #F2B84B; }
+.crop-btns { display: flex; gap: 8px; margin-top: 12px; }
+.crop-btns .btn { flex: 1; }
 </style>
 
 <main class="app" id="app" aria-busy="true">
@@ -531,7 +547,17 @@ body {
       </button>
     </div>
     <input type="file" id="photoFile" accept="image/*" hidden>
+    <div class="crop-back" id="cropBack" hidden>
+      <div class="crop-card" role="dialog" aria-modal="true" aria-labelledby="cropTitle">
+        <h3 id="cropTitle">사진 조정</h3>
+        <p>손가락으로 끌어서 위치를, 아래 슬라이더나 두 손가락으로 크기를 맞춰요.</p>
+        <div class="crop-frame" id="cropFrame"><img id="cropImg" alt=""></div>
+        <div class="crop-zoom"><span>작게</span><input type="range" id="cropZoom" min="100" max="300" value="100" step="1" aria-label="사진 크기"><span>크게</span></div>
+        <div class="crop-btns"><button class="btn" id="cropCancel" type="button">취소</button><button class="btn primary" id="cropOk" type="button">완료</button></div>
+      </div>
+    </div>
     <div class="photo-actions" id="photoActions" hidden>
+      <button class="btn" id="photoAdjust" type="button">사진 조정</button>
       <button class="btn" id="photoChange" type="button">사진 바꾸기</button>
       <button class="btn" id="photoDel" type="button">사진 지우기</button>
     </div>
@@ -1899,25 +1925,133 @@ body {
     return out;
   }
 
-  $('photoEmpty').addEventListener('click', function () { $('photoFile').click(); });
-  $('photoChange').addEventListener('click', function () { $('photoFile').click(); });
-  $('photoFile').addEventListener('change', async function () {
-    var f = this.files && this.files[0];
-    this.value = '';
-    if (!f) return;
-    var k = cur;
+
+  /* ---------- 사진 위치·크기 조정 ---------- */
+  var crop = { img: null, nw: 0, nh: 0, fw: 0, fh: 0, z: 1, ox: 0, oy: 0, pts: {}, pinch: 0, done: null };
+  function cropBase() { return Math.max(crop.fw / crop.nw, crop.fh / crop.nh); }
+  function cropClamp() {
+    var sc = cropBase() * crop.z;
+    crop.ox = Math.min(0, Math.max(crop.fw - crop.nw * sc, crop.ox));
+    crop.oy = Math.min(0, Math.max(crop.fh - crop.nh * sc, crop.oy));
+  }
+  function cropDraw() {
+    cropClamp();
+    var sc = cropBase() * crop.z, im = $('cropImg');
+    im.style.width = (crop.nw * sc) + 'px';
+    im.style.height = (crop.nh * sc) + 'px';
+    im.style.transform = 'translate(' + crop.ox + 'px,' + crop.oy + 'px)';
+    $('cropZoom').value = Math.round(crop.z * 100);
+  }
+  function cropSetZoom(nz, fx, fy) {
+    nz = Math.min(3, Math.max(1, nz));
+    var old = cropBase() * crop.z, nw = cropBase() * nz;
+    crop.ox = fx - (fx - crop.ox) * (nw / old);
+    crop.oy = fy - (fy - crop.oy) * (nw / old);
+    crop.z = nz;
+    cropDraw();
+  }
+  function openCrop(src, onDone) {
+    var im = $('cropImg');
+    crop.done = onDone; crop.url = src;
+    im.onerror = function () { closeCrop(); status('photoRead'); };
+    im.onload = function () {
+      crop.img = im; crop.nw = im.naturalWidth; crop.nh = im.naturalHeight;
+      var fr = $('cropFrame').getBoundingClientRect();
+      crop.fw = fr.width; crop.fh = fr.height; crop.z = 1;
+      crop.ox = (crop.fw - crop.nw * cropBase()) / 2;
+      crop.oy = (crop.fh - crop.nh * cropBase()) / 2;
+      cropDraw();
+    };
+    im.src = src;
+    $('cropBack').hidden = false;
+    if (im.complete && im.naturalWidth) im.onload();
+  }
+  function closeCrop() {
+    $('cropBack').hidden = true; $('cropImg').removeAttribute('src');
+    if (crop.url && crop.url.indexOf('blob:') === 0) { try { URL.revokeObjectURL(crop.url); } catch (x) {} } crop.url = null; crop.done = null; crop.pts = {}; }
+  function cropToDataUrl() {
+    var sc = cropBase() * crop.z;
+    var sx = -crop.ox / sc, sy = -crop.oy / sc, sw = crop.fw / sc, sh = crop.fh / sc;
+    var ow = Math.min(1200, Math.max(300, Math.round(sw))), q = 0.8, out = '';
+    for (var n = 0; n < 6; n++) {
+      var c = document.createElement('canvas');
+      c.width = ow; c.height = Math.round(ow * 3 / 4);
+      c.getContext('2d').drawImage(crop.img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+      out = c.toDataURL('image/jpeg', q);
+      if (out.length < 190000) return out;
+      ow = Math.round(ow * 0.85);
+      q = Math.max(0.5, q - 0.06);
+    }
+    return out;
+  }
+  (function () {
+    var fr = $('cropFrame');
+    function dist() { var k = Object.keys(crop.pts); if (k.length < 2) return 0; var a = crop.pts[k[0]], b = crop.pts[k[1]]; return Math.hypot(a.x - b.x, a.y - b.y); }
+    fr.addEventListener('pointerdown', function (e) {
+      try { fr.setPointerCapture(e.pointerId); } catch (x) {}
+      crop.pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      crop.pinch = dist();
+    });
+    fr.addEventListener('pointermove', function (e) {
+      var p = crop.pts[e.pointerId]; if (!p) return;
+      var keys = Object.keys(crop.pts);
+      if (keys.length >= 2) {
+        crop.pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+        var d = dist();
+        if (crop.pinch && d) {
+          var r = fr.getBoundingClientRect();
+          var a = crop.pts[keys[0]], b = crop.pts[keys[1]];
+          cropSetZoom(crop.z * d / crop.pinch, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+        }
+        crop.pinch = d;
+      } else {
+        crop.ox += e.clientX - p.x; crop.oy += e.clientY - p.y;
+        crop.pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+        cropDraw();
+      }
+    });
+    function up(e) { delete crop.pts[e.pointerId]; crop.pinch = 0; }
+    fr.addEventListener('pointerup', up);
+    fr.addEventListener('pointercancel', up);
+    fr.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var r = fr.getBoundingClientRect();
+      cropSetZoom(crop.z * (e.deltaY < 0 ? 1.08 : 1 / 1.08), e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+    $('cropZoom').addEventListener('input', function () { cropSetZoom(this.value / 100, crop.fw / 2, crop.fh / 2); });
+    $('cropCancel').addEventListener('click', closeCrop);
+    $('cropBack').addEventListener('click', function (e) { if (e.target === this) closeCrop(); });
+    $('cropOk').addEventListener('click', function () {
+      var cb = crop.done, url;
+      try { url = cropToDataUrl(); } catch (x) { closeCrop(); status('photoRead'); return; }
+      closeCrop();
+      if (cb) cb(url);
+    });
+  })();
+  async function savePhotoFor(k, url) {
     status('photoBusy');
-    var url;
-    try { url = await fileToDataUrl(f); } catch (e) { status('photoRead'); return; }
-    try {
-      await store.putPhoto(k, url);
-    } catch (e) { status('photoFail'); return; }
+    try { await store.putPhoto(k, url); } catch (e) { status('photoFail'); return; }
     if (k !== cur) { status('saved'); return; }
     photo = url;
     day.hasPhoto = true;
     renderPhoto();
     renderHead();
     touch();
+  }
+
+  $('photoEmpty').addEventListener('click', function () { $('photoFile').click(); });
+  $('photoChange').addEventListener('click', function () { $('photoFile').click(); });
+  $('photoFile').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    var k = cur;
+    openCrop(URL.createObjectURL(f), function (url) { savePhotoFor(k, url); });
+  });
+  $('photoAdjust').addEventListener('click', function () {
+    if (!photo) return;
+    var k = cur;
+    openCrop(photo, function (url) { savePhotoFor(k, url); });
   });
   $('photoDel').addEventListener('click', async function () {
     var k = cur;
